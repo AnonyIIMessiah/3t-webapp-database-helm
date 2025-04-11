@@ -1,0 +1,25 @@
+{{- if .Values.persistence.enabled}}
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ .Values.persistence.volume.storageClass }}
+provisioner: ebs.csi.aws.com
+parameters:
+  type: gp3
+  fsType: ext4
+reclaimPolicy: {{ .Values.persistence.volume.reclaimPolicy }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.persistence.pvc.name }}
+spec:
+  accessModes:
+    {{- range .Values.persistence.pvc.accessModes }}
+    - {{ . }}
+    {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.pvc.size }}
+  storageClassName: {{ .Values.persistence.volume.storageClass }}  # Reference to the Storage Class storage class name should be same in both
+{{- end }}

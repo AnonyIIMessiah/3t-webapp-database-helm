@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.appName }}
+  labels:
+    app: {{ .Values.appName }}
+spec:
+  serviceName: {{ .Values.appName }}
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.appName }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.appName }}
+    spec:
+      containers:
+        - name: {{ .Values.appName }}
+          image: "{{ .Values.statefulSet.image.repository }}:{{ .Values.statefulSet.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.service.port}}
+          # resources:
+          #   requests:
+          #     cpu: 100m
+          #     memory: 128Mi
+          #   limits:
+          #     cpu: 200m
+          #     memory: 256Mi
+          
+          
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: MONGO_INITDB_ROOT_USERNAME
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: MONGO_INITDB_ROOT_PASSWORD
+          {{- if .Values.persistence.enabled }}
+          volumeMounts:
+            - name: mongodb-data
+              mountPath: /data/db
+      volumes:
+        - name: mongodb-data
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.pvc.name }}
+      {{- end }}

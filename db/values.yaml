@@ -1,0 +1,30 @@
+appName: mongodb
+
+statefulSet:
+  replicas: 1
+  image:
+    repository: mongo
+    tag: 4.0.4
+
+service:
+  type: None
+  port: 27017
+
+persistence:
+  enabled: true
+  volume:
+    storageClass: "standard"
+    reclaimPolicy: Delete
+  pvc:
+    name: my-pvc
+    accessModes:
+      - ReadWriteOnce
+    size: 1Gi
+  
+secrets:
+  enabled: true
+  name: mongodb-secret
+  type: Opaque
+  data:
+    MONGO_INITDB_ROOT_USERNAME: YWRtaW4=  
+    MONGO_INITDB_ROOT_PASSWORD: cGFzcw==
